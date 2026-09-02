@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bobch27/valtra-go"
+	"github.com/lb151/valtra-go"
 )
 
 func TestUppercase(t *testing.T) {
