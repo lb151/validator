@@ -1,4 +1,4 @@
-# Valtra
+# validator
 
 A type-safe, performant **val**idation and **tra**nsformation library for Go that uses generics and functional composition. No reflection, no struct tags - just clean, declarative logic! âš¡
 
@@ -31,7 +31,7 @@ Oh, and it's **~3x faster** than validator (or about **~40x** on cold starts). â
 ## Installation
 
 ```bash
-go get github.com/lb151/valtra-go
+go get github.com/lb151/validator
 ```
 
 ## Usage
@@ -44,7 +44,7 @@ package main
 import (
     "fmt"
 
-    "github.com/lb151/valtra-go"
+    "github.com/lb151/validator"
 )
 
 type User struct {
