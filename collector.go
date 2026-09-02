@@ -1,4 +1,4 @@
-package valtra
+package validator
 
 // Collector accumulates validation errors from multiple
 // Value instances.
@@ -25,10 +25,10 @@ type Collector struct {
 //
 // Example:
 //
-//	c := valtra.NewCollector()
+//	c := validator.NewCollector()
 //	user := User{
-//		name := valtra.Val(input.Name).Validate(valtra.Required[string]()).Collect(c)
-//		age := valtra.Val(input.Age).Validate(valtra.Min(18)).Collect(c)
+//		name := validator.Val(input.Name).Validate(validator.Required[string]()).Collect(c)
+//		age := validator.Val(input.Age).Validate(validator.Min(18)).Collect(c)
 //	}
 //	if !c.IsValid() {
 //	    return c.Errors()

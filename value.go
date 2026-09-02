@@ -1,4 +1,4 @@
-package valtra
+package validator
 
 // Value holds a value to be validated/transformed, along
 // with its name and any errors that occur during
@@ -25,7 +25,7 @@ type Value[T any] struct {
 //
 // Example:
 //
-//	valtra.Val("bobby").Validate(valtra.Required[string]()).Transform(valtra.Uppercase())
+//	validator.Val("bobby").Validate(validator.Required[string]()).Transform(validator.Uppercase())
 func Val[T any](value T, name ...string) Value[T] {
 	valName := "value"
 	if len(name) > 0 && name[0] != "" {
@@ -64,7 +64,7 @@ func (v Value[T]) Errors() []error {
 //
 // Example:
 //
-//	v := valtra.Val("test@example.com").Validate(valtra.Email())
+//	v := validator.Val("test@example.com").Validate(validator.Email())
 //	if v.IsValid() {
 //	    email := v.Value()
 //	    // proceed with valid email
@@ -81,10 +81,10 @@ func (v Value[T]) IsValid() bool {
 //
 // Example:
 //
-//	v := valtra.Val(25).Validate(
-//	    valtra.Required[int](),
-//	    valtra.Min(20),
-//	    valtra.Max(30),
+//	v := validator.Val(25).Validate(
+//	    validator.Required[int](),
+//	    validator.Min(20),
+//	    validator.Max(30),
 //	)
 func (v Value[T]) Validate(validations ...func(Value[T]) error) Value[T] {
 	for _, fn := range validations {
@@ -105,7 +105,7 @@ func (v Value[T]) Validate(validations ...func(Value[T]) error) Value[T] {
 //
 // Example:
 //
-//	v := valtra.Val("hello").Transform(valtra.Uppercase())
+//	v := validator.Val("hello").Transform(validator.Uppercase())
 func (v Value[T]) Transform(transformations ...func(Value[T]) (T, error)) Value[T] {
 	for _, fn := range transformations {
 		newVal, err := fn(v)
@@ -128,10 +128,10 @@ func (v Value[T]) Transform(transformations ...func(Value[T]) (T, error)) Value[
 //
 // Example:
 //
-//	c := valtra.NewCollector()
+//	c := validator.NewCollector()
 //	user := User{
-//		name := valtra.Val(input.Name).Validate(valtra.Required[string]()).Collect(c)
-//		age := valtra.Val(input.Age).Validate(valtra.Min(18)).Collect(c)
+//		name := validator.Val(input.Name).Validate(validator.Required[string]()).Collect(c)
+//		age := validator.Val(input.Age).Validate(validator.Min(18)).Collect(c)
 //	}
 //	if !c.IsValid() {
 //	    return c.Errors()

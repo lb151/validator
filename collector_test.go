@@ -1,17 +1,17 @@
-package valtra_test
+package validator_test
 
 import (
 	"testing"
 
-	"github.com/lb151/valtra-go"
+	"github.com/lb151/validator"
 )
 
 func TestCollector(t *testing.T) {
 	t.Run("collects errors from multiple values", func(t *testing.T) {
-		c := valtra.NewCollector()
+		c := validator.NewCollector()
 
-		name := valtra.Val("").Validate(valtra.Required[string]()).Collect(c)
-		age := valtra.Val(15).Validate(valtra.Min(18)).Collect(c)
+		name := validator.Val("").Validate(validator.Required[string]()).Collect(c)
+		age := validator.Val(15).Validate(validator.Min(18)).Collect(c)
 
 		if c.IsValid() {
 			t.Error("Collector should have errors")
@@ -31,10 +31,10 @@ func TestCollector(t *testing.T) {
 	})
 
 	t.Run("collector with no errors", func(t *testing.T) {
-		c := valtra.NewCollector()
+		c := validator.NewCollector()
 
-		name := valtra.Val(" John ").Validate(valtra.Required[string]()).Transform(valtra.TrimSpace()).Collect(c)
-		age := valtra.Val(25).Validate(valtra.Min(18)).Collect(c)
+		name := validator.Val(" John ").Validate(validator.Required[string]()).Transform(validator.TrimSpace()).Collect(c)
+		age := validator.Val(25).Validate(validator.Min(18)).Collect(c)
 
 		if !c.IsValid() {
 			t.Errorf("Collector should be valid, got errors: %v", c.Errors())

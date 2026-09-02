@@ -1,15 +1,15 @@
-package valtra_test
+package validator_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/lb151/valtra-go"
+	"github.com/lb151/validator"
 )
 
 func TestUppercase(t *testing.T) {
 	t.Run("string to upper case", func(t *testing.T) {
-		v := valtra.Val("hello").Transform(valtra.Uppercase())
+		v := validator.Val("hello").Transform(validator.Uppercase())
 		if v.Value() != "HELLO" {
 			t.Errorf("Expected transformation to pass, got errors: %v", v.Errors())
 		}
@@ -18,7 +18,7 @@ func TestUppercase(t *testing.T) {
 
 func TestLowercase(t *testing.T) {
 	t.Run("string to lower case", func(t *testing.T) {
-		v := valtra.Val("HELLO").Transform(valtra.Lowercase())
+		v := validator.Val("HELLO").Transform(validator.Lowercase())
 		if v.Value() != "hello" {
 			t.Errorf("Expected transformation to pass, got errors: %v", v.Errors())
 		}
@@ -27,7 +27,7 @@ func TestLowercase(t *testing.T) {
 
 func TestTrimSpace(t *testing.T) {
 	t.Run("string with trimmed space", func(t *testing.T) {
-		v := valtra.Val(" hello ").Transform(valtra.TrimSpace())
+		v := validator.Val(" hello ").Transform(validator.TrimSpace())
 		if v.Value() != "hello" {
 			t.Errorf("Expected transformation to pass, got errors: %v", v.Errors())
 		}
@@ -36,7 +36,7 @@ func TestTrimSpace(t *testing.T) {
 
 func TestCapitalise(t *testing.T) {
 	t.Run("string with capital first letter", func(t *testing.T) {
-		v := valtra.Val("bobby").Transform(valtra.Capitalise())
+		v := validator.Val("bobby").Transform(validator.Capitalise())
 		if v.Value() != "Bobby" {
 			t.Errorf("Expected transformation to pass, got errors: %v", v.Errors())
 		}
@@ -45,9 +45,9 @@ func TestCapitalise(t *testing.T) {
 
 func TestMultipleTransformations(t *testing.T) {
 	t.Run("all transformations pass", func(t *testing.T) {
-		v := valtra.Val(" hello ").Transform(
-			valtra.TrimSpace(),
-			valtra.Uppercase(),
+		v := validator.Val(" hello ").Transform(
+			validator.TrimSpace(),
+			validator.Uppercase(),
 		)
 
 		if !v.IsValid() {
@@ -62,7 +62,7 @@ func TestMultipleTransformations(t *testing.T) {
 func TestTransformWithError(t *testing.T) {
 	t.Run("transformation error is collected", func(t *testing.T) {
 		// Custom transformation that returns an error
-		v := valtra.Val("hello").Transform(func(v valtra.Value[string]) (string, error) {
+		v := validator.Val("hello").Transform(func(v validator.Value[string]) (string, error) {
 			return "", fmt.Errorf("transformation failed")
 		})
 

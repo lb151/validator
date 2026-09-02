@@ -1,4 +1,4 @@
-package valtra
+package validator
 
 import (
 	"fmt"
@@ -17,8 +17,8 @@ import (
 //
 // Example:
 //
-//	valtra.Val("").Validate(valtra.Required[string]())  // fails
-//	valtra.Val("John").Validate(valtra.Required[string]())  // passes
+//	validator.Val("").Validate(validator.Required[string]())  // fails
+//	validator.Val("John").Validate(validator.Required[string]())  // passes
 func Required[T comparable](errMssg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		var zero T
@@ -54,7 +54,7 @@ type Ordered interface {
 //
 // Example:
 //
-//	valtra.Val(100).Validate(valtra.Max(100))
+//	validator.Val(100).Validate(validator.Max(100))
 func Max[T Ordered](max T, errMssg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if v.value > max {
@@ -81,7 +81,7 @@ func Max[T Ordered](max T, errMssg ...string) func(Value[T]) error {
 //
 // Example:
 //
-//	valtra.Val(5).Validate(valtra.Min(1))
+//	validator.Val(5).Validate(validator.Min(1))
 func Min[T Ordered](min T, errMssg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if v.value < min {
@@ -105,7 +105,7 @@ func Min[T Ordered](min T, errMssg ...string) func(Value[T]) error {
 //
 // Example:
 //
-//	valtra.Val("username").Validate(valtra.MaxLengthString(20))
+//	validator.Val("username").Validate(validator.MaxLengthString(20))
 func MaxLengthString(max int, errMssg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		if len([]rune(v.value)) > max {
@@ -129,7 +129,7 @@ func MaxLengthString(max int, errMssg ...string) func(Value[string]) error {
 //
 // Example:
 //
-//	valtra.Val([]int{1}).Validate(valtra.MaxLengthSlice(2))
+//	validator.Val([]int{1}).Validate(validator.MaxLengthSlice(2))
 func MaxLengthSlice[T any](max int, errMssg ...string) func(Value[[]T]) error {
 	return func(v Value[[]T]) error {
 		if len(v.value) > max {
@@ -153,7 +153,7 @@ func MaxLengthSlice[T any](max int, errMssg ...string) func(Value[[]T]) error {
 //
 // Example:
 //
-//	valtra.Val(map[string]int{"no": 1}).Validate(valtra.MaxLengthMap(2))
+//	validator.Val(map[string]int{"no": 1}).Validate(validator.MaxLengthMap(2))
 func MaxLengthMap[K comparable, V any](max int, errMssg ...string) func(Value[map[K]V]) error {
 	return func(v Value[map[K]V]) error {
 		if len(v.value) > max {
@@ -177,7 +177,7 @@ func MaxLengthMap[K comparable, V any](max int, errMssg ...string) func(Value[ma
 //
 // Example:
 //
-//	valtra.Val("username").Validate(valtra.MinLengthString(5))
+//	validator.Val("username").Validate(validator.MinLengthString(5))
 func MinLengthString(min int, errMssg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		if len([]rune(v.value)) < min {
@@ -201,7 +201,7 @@ func MinLengthString(min int, errMssg ...string) func(Value[string]) error {
 //
 // Example:
 //
-//	valtra.Val([]int{1}).Validate(valtra.MinLengthSlice(1))
+//	validator.Val([]int{1}).Validate(validator.MinLengthSlice(1))
 func MinLengthSlice[T any](min int, errMssg ...string) func(Value[[]T]) error {
 	return func(v Value[[]T]) error {
 		if len(v.value) < min {
@@ -225,7 +225,7 @@ func MinLengthSlice[T any](min int, errMssg ...string) func(Value[[]T]) error {
 //
 // Example:
 //
-//	valtra.Val(map[string]int{"no": 1}).Validate(valtra.MinLengthMap(1))
+//	validator.Val(map[string]int{"no": 1}).Validate(validator.MinLengthMap(1))
 func MinLengthMap[K comparable, V any](min int, errMssg ...string) func(Value[map[K]V]) error {
 	return func(v Value[map[K]V]) error {
 		if len(v.value) < min {
@@ -259,7 +259,7 @@ var emailRegex = regexp.MustCompile(`^(?:"(?:[^"]|\\")*"|[\p{L}\p{N}\p{M}._%+-]+
 //
 // Example:
 //
-//	valtra.Val("user@example.com").Validate(valtra.Email())
+//	validator.Val("user@example.com").Validate(validator.Email())
 func Email(errMssg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		if !emailRegex.MatchString(v.value) {
@@ -283,7 +283,7 @@ func Email(errMssg ...string) func(Value[string]) error {
 //
 // Example:
 //
-//	valtra.Val("pending").Validate(valtra.OneOf([]string{"pending", "approved", "rejected"}))
+//	validator.Val("pending").Validate(validator.OneOf([]string{"pending", "approved", "rejected"}))
 func OneOf[T comparable](values []T, errMssg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if !slices.Contains(values, v.value) {
@@ -307,7 +307,7 @@ func OneOf[T comparable](values []T, errMssg ...string) func(Value[T]) error {
 //
 // Example:
 //
-//	valtra.Val("john").Validate(valtra.NotIn([]string{"admin", "root", "system"}))
+//	validator.Val("john").Validate(validator.NotIn([]string{"admin", "root", "system"}))
 func NotIn[T comparable](values []T, errMssg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if slices.Contains(values, v.value) {
