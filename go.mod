@@ -1,3 +1,3 @@
-module github.com/bobch27/valtra-go
+module github.com/lb151/valtra-go
 
 go 1.25.1
