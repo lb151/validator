@@ -108,7 +108,7 @@ func Min[T Ordered](min T, errMssg ...string) func(Value[T]) error {
 //	valtra.Val("username").Validate(valtra.MaxLengthString(20))
 func MaxLengthString(max int, errMssg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		if len(v.value) > max {
+		if len([]rune(v.value)) > max {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
 				return fmt.Errorf("%s", errMssg[0])
@@ -180,7 +180,7 @@ func MaxLengthMap[K comparable, V any](max int, errMssg ...string) func(Value[ma
 //	valtra.Val("username").Validate(valtra.MinLengthString(5))
 func MinLengthString(min int, errMssg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		if len(v.value) < min {
+		if len([]rune(v.value)) < min {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
 				return fmt.Errorf("%s", errMssg[0])
