@@ -31,7 +31,7 @@ Oh, and it's **~3x faster** than validator (or about **~40x** on cold starts). â
 ## Installation
 
 ```bash
-go get github.com/bobch27/valtra-go
+go get github.com/lb151/valtra-go
 ```
 
 ## Usage
@@ -44,7 +44,7 @@ package main
 import (
     "fmt"
 
-    "github.com/bobch27/valtra-go"
+    "github.com/lb151/valtra-go"
 )
 
 type User struct {
