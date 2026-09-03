@@ -37,53 +37,58 @@ Here's a complete example showing how to validate and transform a struct using V
 package main
 
 import (
-    "fmt"
+	"fmt"
+	"log"
 
-    "github.com/lb151/validator"
+	"github.com/lb151/validator"
 )
 
 type User struct {
-    Name  string
-    Email string
-    Age   int
+	Name  string
+	Email string
+	Age   int
 }
 
-func NewUser(name string, email string, age int) (User, error) {
-    c := validator.NewCollector()
+func (v *User) Validate() error {
+	c := validator.NewCollector()
 
-    // Value names (e.g. "email") and custom error messages (e.g. "Name is required") are optional.
-    // Names are only used in default error messages.
-    user := User{
-        Name: validator.Val(name).
-            Transform(validator.TrimSpace()).
-            Validate(validator.Required[string]("Name is required"), validator.MinLengthString(3)).
-            Collect(c),
-        Email: validator.Val(email, "email").
-            Transform(validator.TrimSpace(), validator.Lowercase()).
-            Validate(validator.Required[string](), validator.Email()).
-            Collect(c),
-        Age: validator.Val(age).
-            Validate(validator.Min(18, "Age must be 18 or over")).
-            Collect(c),
-    }
+	// Value names (e.g. "email") and custom error messages (e.g. "Name is required") are optional.
+	// Names are only used in default error messages.
+	v.Name = validator.Val(v.Name).
+		Transform(validator.TrimSpace()).
+		Validate(validator.Required[string]("Name is required"), validator.MinLengthString(3)).
+		Collect(c)
+	v.Email = validator.Val(v.Email, "email").
+		Transform(validator.TrimSpace(), validator.Lowercase()).
+		Validate(validator.Required[string](), validator.Email()).
+		Collect(c)
+	v.Age = validator.Val(v.Age).
+		Validate(validator.Min(18, "Age must be 18 or over")).
+		Collect(c)
 
-    // check if there are any errors
-    if !c.IsValid() {
-        // return only first error
-        return User{}, c.Errors()[0]
-    }
+	// check if there are any errors
+	if !c.IsValid() {
+		// return only first error
+		return c.Errors()[0]
+	}
 
-    return user, nil
+	return nil
 }
 
 func main() {
-    user, err := NewUser("Bobby", "hello@bobbydonev.com", 28)
-    if err != nil {
-        log.Fatalln("failed to initiate user: %w", err)
-    }
+	user := new(User)
+	user.Name = "job"
+	user.Age = 10
+	user.Email = "123@qq.com"
 
-    fmt.Println("Success!")
+	err := user.Validate()
+	if err != nil {
+		log.Fatalln("failed to initiate user: %w", err)
+	}
+
+	fmt.Println("Success!")
 }
+
 ```
 
 ## Performance

@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"slices"
@@ -25,10 +26,10 @@ func Required[T comparable](errMssg ...string) func(Value[T]) error {
 		if v.value == zero {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
-			return fmt.Errorf("%s is required", v.name)
+			return errors.New(v.name + " is required")
 		}
 
 		return nil
@@ -60,7 +61,7 @@ func Max[T Ordered](max T, errMssg ...string) func(Value[T]) error {
 		if v.value > max {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s cannot be larger than %v", v.name, max)
@@ -87,7 +88,7 @@ func Min[T Ordered](min T, errMssg ...string) func(Value[T]) error {
 		if v.value < min {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s cannot be smaller than %v", v.name, min)
@@ -111,7 +112,7 @@ func MaxLengthString(max int, errMssg ...string) func(Value[string]) error {
 		if len([]rune(v.value)) > max {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
@@ -135,7 +136,7 @@ func MaxLengthSlice[T any](max int, errMssg ...string) func(Value[[]T]) error {
 		if len(v.value) > max {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
@@ -159,7 +160,7 @@ func MaxLengthMap[K comparable, V any](max int, errMssg ...string) func(Value[ma
 		if len(v.value) > max {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
@@ -183,7 +184,7 @@ func MinLengthString(min int, errMssg ...string) func(Value[string]) error {
 		if len([]rune(v.value)) < min {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
@@ -207,7 +208,7 @@ func MinLengthSlice[T any](min int, errMssg ...string) func(Value[[]T]) error {
 		if len(v.value) < min {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
@@ -231,7 +232,7 @@ func MinLengthMap[K comparable, V any](min int, errMssg ...string) func(Value[ma
 		if len(v.value) < min {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
@@ -265,10 +266,10 @@ func Email(errMssg ...string) func(Value[string]) error {
 		if !emailRegex.MatchString(v.value) {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
-			return fmt.Errorf("%s must be in correct email format", v.name)
+			return errors.New(v.name + " must be in correct email format")
 		}
 
 		return nil
@@ -289,7 +290,7 @@ func OneOf[T comparable](values []T, errMssg ...string) func(Value[T]) error {
 		if !slices.Contains(values, v.value) {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s must be one of: %v", v.name, values)
@@ -313,7 +314,7 @@ func NotIn[T comparable](values []T, errMssg ...string) func(Value[T]) error {
 		if slices.Contains(values, v.value) {
 			// Return custom error message, if provided
 			if len(errMssg) > 0 && errMssg[0] != "" {
-				return fmt.Errorf("%s", errMssg[0])
+				return errors.New(errMssg[0])
 			}
 
 			return fmt.Errorf("%s cannot be one of: %v", v.name, values)
