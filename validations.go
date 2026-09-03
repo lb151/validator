@@ -20,13 +20,13 @@ import (
 //
 //	validator.Val("").Validate(validator.Required[string]())  // fails
 //	validator.Val("John").Validate(validator.Required[string]())  // passes
-func Required[T comparable](errMssg ...string) func(Value[T]) error {
+func Required[T comparable](errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		var zero T
 		if v.value == zero {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return errors.New(v.name + " is required")
@@ -56,12 +56,12 @@ type Ordered interface {
 // Example:
 //
 //	validator.Val(100).Validate(validator.Max(100))
-func Max[T Ordered](max T, errMssg ...string) func(Value[T]) error {
+func Max[T Ordered](max T, errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if v.value > max {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s cannot be larger than %v", v.name, max)
@@ -83,12 +83,12 @@ func Max[T Ordered](max T, errMssg ...string) func(Value[T]) error {
 // Example:
 //
 //	validator.Val(5).Validate(validator.Min(1))
-func Min[T Ordered](min T, errMssg ...string) func(Value[T]) error {
+func Min[T Ordered](min T, errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if v.value < min {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s cannot be smaller than %v", v.name, min)
@@ -107,12 +107,12 @@ func Min[T Ordered](min T, errMssg ...string) func(Value[T]) error {
 // Example:
 //
 //	validator.Val("username").Validate(validator.MaxLengthString(20))
-func MaxLengthString(max int, errMssg ...string) func(Value[string]) error {
+func MaxLengthString(max int, errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		if len([]rune(v.value)) > max {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
@@ -131,12 +131,12 @@ func MaxLengthString(max int, errMssg ...string) func(Value[string]) error {
 // Example:
 //
 //	validator.Val([]int{1}).Validate(validator.MaxLengthSlice(2))
-func MaxLengthSlice[T any](max int, errMssg ...string) func(Value[[]T]) error {
+func MaxLengthSlice[T any](max int, errsMsg ...string) func(Value[[]T]) error {
 	return func(v Value[[]T]) error {
 		if len(v.value) > max {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
@@ -155,12 +155,12 @@ func MaxLengthSlice[T any](max int, errMssg ...string) func(Value[[]T]) error {
 // Example:
 //
 //	validator.Val(map[string]int{"no": 1}).Validate(validator.MaxLengthMap(2))
-func MaxLengthMap[K comparable, V any](max int, errMssg ...string) func(Value[map[K]V]) error {
+func MaxLengthMap[K comparable, V any](max int, errsMsg ...string) func(Value[map[K]V]) error {
 	return func(v Value[map[K]V]) error {
 		if len(v.value) > max {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
@@ -179,12 +179,12 @@ func MaxLengthMap[K comparable, V any](max int, errMssg ...string) func(Value[ma
 // Example:
 //
 //	validator.Val("username").Validate(validator.MinLengthString(5))
-func MinLengthString(min int, errMssg ...string) func(Value[string]) error {
+func MinLengthString(min int, errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		if len([]rune(v.value)) < min {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
@@ -203,12 +203,12 @@ func MinLengthString(min int, errMssg ...string) func(Value[string]) error {
 // Example:
 //
 //	validator.Val([]int{1}).Validate(validator.MinLengthSlice(1))
-func MinLengthSlice[T any](min int, errMssg ...string) func(Value[[]T]) error {
+func MinLengthSlice[T any](min int, errsMsg ...string) func(Value[[]T]) error {
 	return func(v Value[[]T]) error {
 		if len(v.value) < min {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
@@ -227,12 +227,12 @@ func MinLengthSlice[T any](min int, errMssg ...string) func(Value[[]T]) error {
 // Example:
 //
 //	validator.Val(map[string]int{"no": 1}).Validate(validator.MinLengthMap(1))
-func MinLengthMap[K comparable, V any](min int, errMssg ...string) func(Value[map[K]V]) error {
+func MinLengthMap[K comparable, V any](min int, errsMsg ...string) func(Value[map[K]V]) error {
 	return func(v Value[map[K]V]) error {
 		if len(v.value) < min {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
@@ -261,12 +261,12 @@ var emailRegex = regexp.MustCompile(`^(?:"(?:[^"]|\\")*"|[\p{L}\p{N}\p{M}._%+-]+
 // Example:
 //
 //	validator.Val("user@example.com").Validate(validator.Email())
-func Email(errMssg ...string) func(Value[string]) error {
+func Email(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		if !emailRegex.MatchString(v.value) {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return errors.New(v.name + " must be in correct email format")
@@ -285,12 +285,12 @@ func Email(errMssg ...string) func(Value[string]) error {
 // Example:
 //
 //	validator.Val("pending").Validate(validator.OneOf([]string{"pending", "approved", "rejected"}))
-func OneOf[T comparable](values []T, errMssg ...string) func(Value[T]) error {
+func OneOf[T comparable](values []T, errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if !slices.Contains(values, v.value) {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s must be one of: %v", v.name, values)
@@ -309,12 +309,12 @@ func OneOf[T comparable](values []T, errMssg ...string) func(Value[T]) error {
 // Example:
 //
 //	validator.Val("john").Validate(validator.NotIn([]string{"admin", "root", "system"}))
-func NotIn[T comparable](values []T, errMssg ...string) func(Value[T]) error {
+func NotIn[T comparable](values []T, errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
 		if slices.Contains(values, v.value) {
 			// Return custom error message, if provided
-			if len(errMssg) > 0 && errMssg[0] != "" {
-				return errors.New(errMssg[0])
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
 			}
 
 			return fmt.Errorf("%s cannot be one of: %v", v.name, values)
