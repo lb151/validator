@@ -1,10 +1,13 @@
 package validator
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"regexp"
+	"net"
+	"net/url"
 	"slices"
+	"time"
 )
 
 // Required returns a validation that ensures the value is
@@ -34,14 +37,6 @@ func Required[T comparable](errsMsg ...string) func(Value[T]) error {
 
 		return nil
 	}
-}
-
-// Ordered is a constraint that permits all numeric types
-// that support comparison operations (<, >, <=, >=).
-type Ordered interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-		~float32 | ~float64
 }
 
 // Max returns a validation that ensures the value does
@@ -242,11 +237,6 @@ func MinLengthMap[K comparable, V any](min int, errsMsg ...string) func(Value[ma
 	}
 }
 
-// emailRegex is a practical, internationally-aware email format.
-// Supports Unicode characters (accents, non-Latin scripts)
-// in email addresses.
-var emailRegex = regexp.MustCompile(`^(?:"(?:[^"]|\\")*"|[\p{L}\p{N}\p{M}._%+-]+)@[\p{L}\p{N}\p{M}.-]+\.[\p{L}\p{M}]{2,}$`)
-
 // Email returns a validation that ensures the value
 // is a valid email address.
 //
@@ -263,7 +253,7 @@ var emailRegex = regexp.MustCompile(`^(?:"(?:[^"]|\\")*"|[\p{L}\p{N}\p{M}._%+-]+
 //	validator.Val("user@example.com").Validate(validator.Email())
 func Email(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		if !emailRegex.MatchString(v.value) {
+		if !rxEmail.MatchString(v.value) {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
@@ -321,5 +311,312 @@ func NotIn[T comparable](values []T, errsMsg ...string) func(Value[T]) error {
 		}
 
 		return nil
+	}
+}
+
+func IdNo(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if !rxIdNo.MatchString(v.value) {
+			// Return custom error message, if provided
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " must be in the valid ID card format")
+		}
+
+		return nil
+	}
+}
+
+// TimeYm returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("2026-09").Validate(validator.TimeYm("Inconsistent time format"))
+
+func TimeYm(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		_, err := time.Parse(timeLayoutYm, v.value)
+		if err != nil {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " not a valid date format")
+		}
+
+		return nil
+	}
+
+}
+
+// TimeYmd returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("2026-09-01").Validate(validator.TimeYmd("Inconsistent time format"))
+
+func TimeYmd(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		_, err := time.Parse(timeLayoutYmd, v.value)
+		if err != nil {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " not a valid date format")
+		}
+
+		return nil
+	}
+
+}
+
+// TimeYmdHis returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("2026-09-01 10:10:01").Validate(validator.TimeYmdHis("Inconsistent time format"))
+
+func TimeYmdHis(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		_, err := time.Parse(timeLayoutYmdHis, v.value)
+		if err != nil {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " not a valid date format")
+		}
+
+		return nil
+	}
+
+}
+
+// URL returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("https://www.baidu.com").Validate(validator.URL("is not a valid URL"))
+
+func URL(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		flag := true
+		if v.value == "" || len(v.value) >= maxURLRuneCount || len(v.value) <= minURLRuneCount {
+			flag = false
+		}
+
+		if flag {
+			u, err := url.Parse(v.value)
+			if err != nil || u.Scheme == "" || u.Host == "" {
+				flag = false
+			}
+		}
+
+		if !flag {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " is not a valid URL")
+		}
+
+		return nil
+	}
+}
+
+// IP returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("127.0.0.1").Validate(validator.IP("is not a valid IP"))
+
+func IP(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		err := net.ParseIP(v.value)
+		if err == nil || err.To4() == nil {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " is not a valid IP")
+		}
+
+		return nil
+	}
+}
+
+// JSON returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(`{"name": 123}`).Validate(validator.JSON("is not a valid JSON"))
+
+func JSON(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if json.Valid([]byte(v.value)) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " is not a valid JSON")
+	}
+}
+
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(`abC`).Validate(validator.Alpha("is not a valid alpha"))
+
+func Alpha(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if rxAlpha.MatchString(v.value) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " is not a valid alpha")
+	}
+}
+
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(`Ac09`).Validate(validator.Alphanumeric("is not a valid alphanumeric"))
+
+func Alphanumeric(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if rxAlphanumeric.MatchString(v.value) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " is not a valid alphanumeric")
+	}
+}
+
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(-1).Validate(validator.NonNegative("cannot be a negative number"))
+
+func NonNegative[T Ordered](errsMsg ...string) func(Value[T]) error {
+	return func(v Value[T]) error {
+		var zero T
+		if v.value < zero {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " cannot be a negative number")
+		}
+
+		return nil
+	}
+}
+
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(-1).Validate(validator.Numeric("cannot be a numeric"))
+
+func Numeric[T IntOrdered](errsMsg ...string) func(Value[T]) error {
+	return func(v Value[T]) error {
+		var zero T
+		if v.value < zero {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " cannot be a numeric")
+		}
+
+		return nil
+	}
+}
+
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(100).Validate(validator.IncID("must be greater than zero"))
+
+func IncID[T IntOrdered](errsMsg ...string) func(Value[T]) error {
+	return func(v Value[T]) error {
+		var zero T
+		if v.value <= zero {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " must be greater than zero")
+		}
+
+		return nil
+	}
+}
+
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val(`1,10,20`).Validate(validator.IDs("is not a valid comma-separated ID string"))
+
+func IDs(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if rxIds.MatchString(v.value) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " is not a valid comma-separated ID string")
 	}
 }

@@ -376,3 +376,366 @@ func TestMultipleValidations(t *testing.T) {
 		}
 	})
 }
+
+func TestIdNo(t *testing.T) {
+	t.Run("valid id card passes", func(t *testing.T) {
+		v := validator.Val("140101198001010016").Validate(validator.IdNo())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid id card fails", func(t *testing.T) {
+		v := validator.Val("140101800101001").Validate(validator.IdNo())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid id card")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid id card"
+		v := validator.Val("140101800101001").Validate(validator.IdNo(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestTimeYm(t *testing.T) {
+	t.Run("valid time format ym passes", func(t *testing.T) {
+		v := validator.Val("2026-09").Validate(validator.TimeYm())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid time format ym fails", func(t *testing.T) {
+		v := validator.Val("2026").Validate(validator.TimeYm())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid ym")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid time format ym"
+		v := validator.Val("2026").Validate(validator.TimeYm(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestTimeYmd(t *testing.T) {
+	t.Run("valid time format ymd passes", func(t *testing.T) {
+		v := validator.Val("2026-09-01").Validate(validator.TimeYmd())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid time format ymd fails", func(t *testing.T) {
+		v := validator.Val("2026").Validate(validator.TimeYmd())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid ymd")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid time format ymd"
+		v := validator.Val("2026").Validate(validator.TimeYmd(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestTimeYmdHis(t *testing.T) {
+	t.Run("valid time format ymdHis passes", func(t *testing.T) {
+		v := validator.Val("2026-09-01 10:00:00").Validate(validator.TimeYmdHis())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid time format ymdHis fails", func(t *testing.T) {
+		v := validator.Val("2026").Validate(validator.TimeYmdHis())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid ymdHis")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid time format ymdHis"
+		v := validator.Val("2026").Validate(validator.TimeYmdHis(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestURL(t *testing.T) {
+	t.Run("valid url passes", func(t *testing.T) {
+		v := validator.Val("http://www.test.com").Validate(validator.URL())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid url fails", func(t *testing.T) {
+		v := validator.Val("test.com").Validate(validator.URL())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid url")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid url link"
+		v := validator.Val("test.com").Validate(validator.URL(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestIP(t *testing.T) {
+	t.Run("valid ip passes", func(t *testing.T) {
+		v := validator.Val("192.168.0.1").Validate(validator.IP())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid ip fails", func(t *testing.T) {
+		v := validator.Val("192.168.0").Validate(validator.IP())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid ip")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid ip address"
+		v := validator.Val("0.0.0.0").Validate(validator.IP(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestJSON(t *testing.T) {
+	t.Run("valid json passes", func(t *testing.T) {
+		v := validator.Val(`{"name":"jom"}`).Validate(validator.JSON())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid json fails", func(t *testing.T) {
+		v := validator.Val("abc").Validate(validator.JSON())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid json")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid json address"
+		v := validator.Val("abc").Validate(validator.JSON(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestAlpha(t *testing.T) {
+	t.Run("valid alpha passes", func(t *testing.T) {
+		v := validator.Val(`Abc`).Validate(validator.Alpha())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid alpha fails", func(t *testing.T) {
+		v := validator.Val("123").Validate(validator.Alpha())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid alpha")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid alpha"
+		v := validator.Val("123").Validate(validator.Alpha(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestAlphanumeric(t *testing.T) {
+	t.Run("valid alpha numeric passes", func(t *testing.T) {
+		v := validator.Val(`Abc`).Validate(validator.Alphanumeric())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid alpha numeric fails", func(t *testing.T) {
+		v := validator.Val("123").Validate(validator.Alphanumeric())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid alpha numeric")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid alpha numeric"
+		v := validator.Val("123").Validate(validator.Alphanumeric(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestNonNegative(t *testing.T) {
+	t.Run("valid non negative passes", func(t *testing.T) {
+		v := validator.Val[int](0).Validate(validator.NonNegative[int]())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid non negative fails", func(t *testing.T) {
+		v := validator.Val[int](-10).Validate(validator.NonNegative[int]())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid non negative")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid non negative"
+		v := validator.Val[int](-10).Validate(validator.NonNegative[int](customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestNumeric(t *testing.T) {
+	t.Run("valid numeric passes", func(t *testing.T) {
+		v := validator.Val[int](0).Validate(validator.Numeric[int]())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid numeric fails", func(t *testing.T) {
+		v := validator.Val[int](-10).Validate(validator.Numeric[int]())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid numeric")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid numeric"
+		v := validator.Val[int](-10).Validate(validator.Numeric[int](customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestIncID(t *testing.T) {
+	t.Run("incremental ID validations error", func(t *testing.T) {
+		v := validator.Val[int](0).Validate(validator.IncID[int]())
+
+		if v.IsValid() {
+			t.Errorf("Expected error, got %v", v.Errors())
+		}
+	})
+
+	t.Run("ids validations pass", func(t *testing.T) {
+		v := validator.Val[int](10).Validate(
+			validator.IncID[int](),
+		)
+
+		if !v.IsValid() {
+			t.Errorf("Expected validations to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid auto-incremented ID"
+		v := validator.Val[int](-10).Validate(validator.IncID[int](customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+
+}
+
+func TestIds(t *testing.T) {
+	t.Run("ids validations error", func(t *testing.T) {
+		v := validator.Val("1,2,a").Validate(
+			validator.IDs(),
+		)
+
+		if v.IsValid() {
+			t.Errorf("Expected error, got %v", v.Errors())
+		}
+	})
+
+	t.Run("ids validations pass", func(t *testing.T) {
+		v := validator.Val("1,2,3").Validate(
+			validator.IDs(),
+		)
+
+		if !v.IsValid() {
+			t.Errorf("Expected validations to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "valid comma-separated ID string"
+		v := validator.Val("1,2,a").Validate(validator.IDs(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+
+}

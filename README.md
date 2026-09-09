@@ -39,6 +39,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"errors"
 
 	"github.com/lb151/validator"
 )
@@ -54,7 +55,7 @@ func (v *User) Validate() error {
 
 	// Value names (e.g. "email") and custom error messages (e.g. "Name is required") are optional.
 	// Names are only used in default error messages.
-	v.Name = validator.Val(v.Name).
+	v.Name = validator.Val(v.Name,"name").
 		Transform(validator.TrimSpace()).
 		Validate(validator.Required[string]("Name is required"), validator.MinLengthString(3)).
 		Collect(c)
@@ -62,7 +63,7 @@ func (v *User) Validate() error {
 		Transform(validator.TrimSpace(), validator.Lowercase()).
 		Validate(validator.Required[string](), validator.Email()).
 		Collect(c)
-	v.Age = validator.Val(v.Age).
+	v.Age = validator.Val(v.Age,"age").
 		Validate(validator.Min(18, "Age must be 18 or over")).
 		Collect(c)
 
@@ -87,6 +88,23 @@ func main() {
 	}
 
 	fmt.Println("Success!")
+}
+
+// custom validator
+// the value cannot be empty
+
+func CustomValidator(errsMsg ...string) func(validator.Value[string]) error {
+	return func(v validator.Value[string]) error {
+		if v.Value() == "" {
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.Name() + " is not a valid value")
+		}
+
+		return nil
+	}
 }
 
 ```
