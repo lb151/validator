@@ -529,7 +529,7 @@ func TestIP(t *testing.T) {
 
 	t.Run("custom error message", func(t *testing.T) {
 		customMsg := "invalid ip address"
-		v := validator.Val("0.0.0.0").Validate(validator.IP(customMsg))
+		v := validator.Val("192.168.0").Validate(validator.IP(customMsg))
 		if v.IsValid() {
 			t.Error("Expected validation to fail")
 		}
@@ -611,33 +611,6 @@ func TestAlphanumeric(t *testing.T) {
 	t.Run("custom error message", func(t *testing.T) {
 		customMsg := "invalid alpha numeric"
 		v := validator.Val("123").Validate(validator.Alphanumeric(customMsg))
-		if v.IsValid() {
-			t.Error("Expected validation to fail")
-		}
-		if v.Errors()[0].Error() != customMsg {
-			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
-		}
-	})
-}
-
-func TestNonNegative(t *testing.T) {
-	t.Run("valid non negative passes", func(t *testing.T) {
-		v := validator.Val[int](0).Validate(validator.NonNegative[int]())
-		if !v.IsValid() {
-			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
-		}
-	})
-
-	t.Run("invalid non negative fails", func(t *testing.T) {
-		v := validator.Val[int](-10).Validate(validator.NonNegative[int]())
-		if v.IsValid() {
-			t.Error("Expected validation to fail for invalid non negative")
-		}
-	})
-
-	t.Run("custom error message", func(t *testing.T) {
-		customMsg := "invalid non negative"
-		v := validator.Val[int](-10).Validate(validator.NonNegative[int](customMsg))
 		if v.IsValid() {
 			t.Error("Expected validation to fail")
 		}

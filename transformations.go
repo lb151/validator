@@ -1,6 +1,8 @@
 package validator
 
-import "strings"
+import (
+	"strings"
+)
 
 // Uppercase returns a transformation that converts the
 // value to upper case.
@@ -46,6 +48,10 @@ func TrimSpace() func(Value[string]) (string, error) {
 //	validator.Val("john").Transform(validator.Capitalise())
 func Capitalise() func(Value[string]) (string, error) {
 	return func(v Value[string]) (string, error) {
+		if v.value == "" {
+			return "", nil
+		}
+
 		return strings.ToUpper(v.value[:1]) + strings.ToLower(v.value[1:]), nil
 	}
 }

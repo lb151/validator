@@ -420,7 +420,8 @@ func TimeYmdHis(errsMsg ...string) func(Value[string]) error {
 func URL(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		flag := true
-		if v.value == "" || len(v.value) >= maxURLRuneCount || len(v.value) <= minURLRuneCount {
+		urlLen := len([]rune(v.value))
+		if v.value == "" || urlLen >= maxURLRuneCount || urlLen <= minURLRuneCount {
 			flag = false
 		}
 
@@ -455,8 +456,8 @@ func URL(errsMsg ...string) func(Value[string]) error {
 
 func IP(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		err := net.ParseIP(v.value)
-		if err == nil || err.To4() == nil {
+		addr := net.ParseIP(v.value)
+		if addr == nil {
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
 			}
@@ -531,28 +532,6 @@ func Alphanumeric(errsMsg ...string) func(Value[string]) error {
 		}
 
 		return errors.New(v.name + " is not a valid alphanumeric")
-	}
-}
-
-// An optional custom error message can be provided as the
-// last parameter.
-//
-// Example:
-//
-//	validator.Val(-1).Validate(validator.NonNegative("cannot be a negative number"))
-
-func NonNegative[T Ordered](errsMsg ...string) func(Value[T]) error {
-	return func(v Value[T]) error {
-		var zero T
-		if v.value < zero {
-			if len(errsMsg) > 0 && errsMsg[0] != "" {
-				return errors.New(errsMsg[0])
-			}
-
-			return errors.New(v.name + " cannot be a negative number")
-		}
-
-		return nil
 	}
 }
 
