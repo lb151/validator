@@ -404,6 +404,60 @@ func TestIdNo(t *testing.T) {
 	})
 }
 
+func TestMobile(t *testing.T) {
+	t.Run("valid mobile number passes", func(t *testing.T) {
+		v := validator.Val("15029009572").Validate(validator.Mobile())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid mobile number fails", func(t *testing.T) {
+		v := validator.Val("1502900957").Validate(validator.Mobile())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid mobile number")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid mobile number"
+		v := validator.Val("1502900957").Validate(validator.Mobile(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestMobileWithCode(t *testing.T) {
+	t.Run("valid mobile number with code passes", func(t *testing.T) {
+		v := validator.Val("86-15029009572").Validate(validator.MobileWithCode())
+		if !v.IsValid() {
+			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("invalid mobile number with code fails", func(t *testing.T) {
+		v := validator.Val("1502900957").Validate(validator.MobileWithCode())
+		if v.IsValid() {
+			t.Error("Expected validation to fail for invalid mobile number with code")
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid mobile number with code"
+		v := validator.Val("1502900957").Validate(validator.MobileWithCode(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
 func TestTimeYm(t *testing.T) {
 	t.Run("valid time format ym passes", func(t *testing.T) {
 		v := validator.Val("2026-09").Validate(validator.TimeYm())
@@ -595,14 +649,14 @@ func TestAlpha(t *testing.T) {
 
 func TestAlphanumeric(t *testing.T) {
 	t.Run("valid alpha numeric passes", func(t *testing.T) {
-		v := validator.Val(`Abc`).Validate(validator.Alphanumeric())
+		v := validator.Val(`Abc123`).Validate(validator.Alphanumeric())
 		if !v.IsValid() {
 			t.Errorf("Expected validation to pass, got errors: %v", v.Errors())
 		}
 	})
 
 	t.Run("invalid alpha numeric fails", func(t *testing.T) {
-		v := validator.Val("123").Validate(validator.Alphanumeric())
+		v := validator.Val("123.").Validate(validator.Alphanumeric())
 		if v.IsValid() {
 			t.Error("Expected validation to fail for invalid alpha numeric")
 		}
@@ -610,7 +664,7 @@ func TestAlphanumeric(t *testing.T) {
 
 	t.Run("custom error message", func(t *testing.T) {
 		customMsg := "invalid alpha numeric"
-		v := validator.Val("123").Validate(validator.Alphanumeric(customMsg))
+		v := validator.Val("abc+").Validate(validator.Alphanumeric(customMsg))
 		if v.IsValid() {
 			t.Error("Expected validation to fail")
 		}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/mail"
 	"net/url"
 	"slices"
 	"time"
@@ -253,7 +254,19 @@ func MinLengthMap[K comparable, V any](min int, errsMsg ...string) func(Value[ma
 //	validator.Val("user@example.com").Validate(validator.Email())
 func Email(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
+		flag := true
 		if !rxEmail.MatchString(v.value) {
+			flag = false
+		}
+
+		if flag {
+			_, err := mail.ParseAddress(v.value)
+			if err != nil {
+				flag = false
+			}
+		}
+
+		if !flag {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
@@ -314,9 +327,52 @@ func NotIn[T comparable](values []T, errsMsg ...string) func(Value[T]) error {
 	}
 }
 
+// IdNo returns a validation that ensures the value
+// does not match any of the provided forbidden values.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("110105194912310021").Validate(validator.IdNo("is not valid ID card format")
+
 func IdNo(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
+		flag := true
 		if !rxIdNo.MatchString(v.value) {
+			flag = false
+
+		}
+
+		if flag {
+			pt, err := time.Parse("20060102", v.value[6:14])
+			if err != nil || pt.After(time.Now()) {
+				flag = false
+			}
+		}
+
+		if flag {
+			weights := [17]int{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2}
+			checkMap := map[int]byte{0: '1', 1: '0', 2: 'X', 3: '9', 4: '8', 5: '7', 6: '6', 7: '5', 8: '4', 9: '3', 10: '2'}
+
+			sum := 0
+			for i := range 17 {
+				sum += int(v.value[i]-'0') * weights[i]
+			}
+			want := checkMap[sum%11]
+			last := v.value[17]
+			if last == 'x' {
+				last = 'X'
+			}
+
+			if last != want {
+				flag = false
+			}
+
+		}
+
+		if !flag {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
@@ -326,6 +382,42 @@ func IdNo(errsMsg ...string) func(Value[string]) error {
 		}
 
 		return nil
+	}
+}
+
+// Example:
+//
+//	validator.Val(`1502900957`).Validate(validator.Mobile("is not a mobile number"))
+
+func Mobile(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if rxMobile.MatchString(v.value) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " must be a mobile number")
+	}
+}
+
+// Example:
+//
+//	validator.Val(`86+1502900957`).Validate(validator.Mobile("is not a mobile number"))
+
+func MobileWithCode(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if rxMobileCode.MatchString(v.value) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " must be a mobile number")
 	}
 }
 
