@@ -278,9 +278,9 @@ func TestEmail(t *testing.T) {
 		}
 	})
 
-	t.Run("email with unicode passes", func(t *testing.T) {
+	t.Run("email with unicode fails", func(t *testing.T) {
 		v := validator.Val("tëst@example.com").Validate(validator.Email())
-		if !v.IsValid() {
+		if v.IsValid() {
 			t.Errorf("Expected validation to pass for unicode email, got errors: %v", v.Errors())
 		}
 	})

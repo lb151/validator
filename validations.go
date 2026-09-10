@@ -335,7 +335,7 @@ func NotIn[T comparable](values []T, errsMsg ...string) func(Value[T]) error {
 //
 // Example:
 //
-//	validator.Val("110105194912310021").Validate(validator.IdNo("is not valid ID card format")
+//	validator.Val("140101198001010016").Validate(validator.IdNo("is not valid ID card format")
 
 func IdNo(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
@@ -405,7 +405,7 @@ func Mobile(errsMsg ...string) func(Value[string]) error {
 
 // Example:
 //
-//	validator.Val(`86+1502900957`).Validate(validator.Mobile("is not a mobile number"))
+//	validator.Val(`86-1502900957`).Validate(validator.Mobile("is not a mobile number"))
 
 func MobileWithCode(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
