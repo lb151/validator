@@ -50,6 +50,28 @@ type User struct {
 	Age   int
 }
 
+//recommended usage
+
+func (v *User) ValidateFast() error {
+	name := validator.Val(v.Name,"name").Transform(validator.TrimSpace())
+	email := validator.Val(v.Email, "email").Transform(validator.TrimSpace(), validator.Lowercase())
+
+	v.Name = name.Value()
+	v.Email = email.Value()
+	
+	err := validator.ValidateFast(
+		validator.Field(name,validator.Required[string]("Name is required"), validator.MinLengthString(3)),
+		validator.Field(email,validator.Required[string](), validator.Email()),
+		validator.Field(validator.Val(v.Age,"age"),validator.Min(18, "Age must be 18 or over")),
+		)
+	
+	if err != nil {
+		return err
+    }
+		
+	return nil	
+}
+
 func (v *User) Validate() error {
 	c := validator.NewCollector()
 
