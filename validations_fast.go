@@ -22,7 +22,7 @@ type FieldCollector struct {
 //
 // )
 //
-//		if err ! = nil {
+//		if err != nil {
 //		   return err // This returns the first error that occurred, and subsequent fields are not processed.
 //	 }
 //
