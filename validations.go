@@ -387,7 +387,7 @@ func IdNo(errsMsg ...string) func(Value[string]) error {
 
 // Example:
 //
-//	validator.Val(`1502900957`).Validate(validator.Mobile("is not a mobile number"))
+//	validator.Val("1502900957").Validate(validator.Mobile("is not a mobile number"))
 
 func Mobile(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
@@ -405,7 +405,7 @@ func Mobile(errsMsg ...string) func(Value[string]) error {
 
 // Example:
 //
-//	validator.Val(`86-1502900957`).Validate(validator.Mobile("is not a mobile number"))
+//	validator.Val("86-1502900957").Validate(validator.Mobile("is not a mobile number"))
 
 func MobileWithCode(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
@@ -590,7 +590,7 @@ func JSON(errsMsg ...string) func(Value[string]) error {
 //
 // Example:
 //
-//	validator.Val(`abC`).Validate(validator.Alpha("is not a valid alpha"))
+//	validator.Val("abC").Validate(validator.Alpha("is not a valid alpha"))
 
 func Alpha(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
@@ -611,7 +611,7 @@ func Alpha(errsMsg ...string) func(Value[string]) error {
 //
 // Example:
 //
-//	validator.Val(`Ac09`).Validate(validator.Alphanumeric("is not a valid alphanumeric"))
+//	validator.Val("Ac09").Validate(validator.Alphanumeric("is not a valid alphanumeric"))
 
 func Alphanumeric(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
@@ -649,6 +649,8 @@ func Numeric[T IntOrdered](errsMsg ...string) func(Value[T]) error {
 	}
 }
 
+//non-zero numeric id
+//
 // An optional custom error message can be provided as the
 // last parameter.
 //
@@ -671,12 +673,14 @@ func IncID[T IntOrdered](errsMsg ...string) func(Value[T]) error {
 	}
 }
 
+//comma-separated numeric string
+//
 // An optional custom error message can be provided as the
 // last parameter.
 //
 // Example:
 //
-//	validator.Val(`1,10,20`).Validate(validator.IDs("is not a valid comma-separated ID string"))
+//	validator.Val("1,10,20").Validate(validator.IDs("is not a valid comma-separated ID string"))
 
 func IDs(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
@@ -689,5 +693,28 @@ func IDs(errsMsg ...string) func(Value[string]) error {
 		}
 
 		return errors.New(v.name + " is not a valid comma-separated ID string")
+	}
+}
+
+//six-digit verification code verification
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
+// Example:
+//
+//	validator.Val("123456").Validate(validator.VerifyCode("is not a valid verification code"))
+
+func VerifyCode(errsMsg ...string) func(Value[string]) error {
+	return func(v Value[string]) error {
+		if rxVerifyCode.MatchString(v.value) {
+			return nil
+		}
+
+		if len(errsMsg) > 0 && errsMsg[0] != "" {
+			return errors.New(errsMsg[0])
+		}
+
+		return errors.New(v.name + " is not a valid verification code")
 	}
 }

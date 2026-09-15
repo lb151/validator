@@ -755,8 +755,42 @@ func TestIds(t *testing.T) {
 	})
 
 	t.Run("custom error message", func(t *testing.T) {
-		customMsg := "valid comma-separated ID string"
+		customMsg := "invalid comma-separated ID string"
 		v := validator.Val("1,2,a").Validate(validator.IDs(customMsg))
+		if v.IsValid() {
+			t.Error("Expected validation to fail")
+		}
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+
+}
+
+func TestVerifyCode(t *testing.T) {
+	t.Run("verification code validations error", func(t *testing.T) {
+		v := validator.Val("123abc").Validate(
+			validator.VerifyCode(),
+		)
+
+		if v.IsValid() {
+			t.Errorf("Expected error, got %v", v.Errors())
+		}
+	})
+
+	t.Run("verification code validations pass", func(t *testing.T) {
+		v := validator.Val("123456").Validate(
+			validator.VerifyCode(),
+		)
+
+		if !v.IsValid() {
+			t.Errorf("Expected validations to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("custom error message", func(t *testing.T) {
+		customMsg := "invalid verification code"
+		v := validator.Val("123Abc").Validate(validator.VerifyCode(customMsg))
 		if v.IsValid() {
 			t.Error("Expected validation to fail")
 		}

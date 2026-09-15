@@ -17,6 +17,7 @@ const (
 	IdsExp          = `^[1-9]\d*(,[1-9]\d*)*$`
 	alphaExp        = `^[a-zA-Z]+$`
 	alphanumericExp = `^[a-zA-Z0-9]+$`
+	verifyCodeExp   = `^\d{6}$`
 )
 
 var (
@@ -27,6 +28,7 @@ var (
 	rxIds          = regexp.MustCompile(IdsExp)
 	rxAlpha        = regexp.MustCompile(alphaExp)
 	rxAlphanumeric = regexp.MustCompile(alphanumericExp)
+	rxVerifyCode   = regexp.MustCompile(verifyCodeExp)
 )
 
 // Ordered is a constraint that permits all numeric types
