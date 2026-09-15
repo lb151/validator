@@ -14,7 +14,7 @@ const (
 	idNoExp         = `^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[0-9Xx]$`
 	mobileExp       = `^1[3-9]\d{9}$`
 	mobileCodeExp   = `^[1-9]\d{0,3}-\d{7,11}$`
-	IdsExp          = `^[1-9]\d*(,[1-9]\d*)*$`
+	idsExp          = `^[1-9]\d*(,[1-9]\d*)*$`
 	alphaExp        = `^[a-zA-Z]+$`
 	alphanumericExp = `^[a-zA-Z0-9]+$`
 	verifyCodeExp   = `^\d{6}$`
@@ -25,7 +25,7 @@ var (
 	rxIdNo         = regexp.MustCompile(idNoExp)
 	rxMobile       = regexp.MustCompile(mobileExp)
 	rxMobileCode   = regexp.MustCompile(mobileCodeExp)
-	rxIds          = regexp.MustCompile(IdsExp)
+	rxIds          = regexp.MustCompile(idsExp)
 	rxAlpha        = regexp.MustCompile(alphaExp)
 	rxAlphanumeric = regexp.MustCompile(alphanumericExp)
 	rxVerifyCode   = regexp.MustCompile(verifyCodeExp)
