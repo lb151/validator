@@ -538,6 +538,59 @@ func TestMobileWithCode(t *testing.T) {
 			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
 		}
 	})
+
+	t.Run("international numbers pass", func(t *testing.T) {
+		// Various valid international format numbers
+		valid := []string{
+			"86-15029009572", // China (13 digits national)
+			"1-2025550143",   // US/Canada (10 digits)
+			"44-2079460942",  // UK (10 digits)
+			"81-312345678",   // Japan (9 digits)
+			"49-301234567",   // Germany (9 digits)
+			"7-4951234567",   // Russia (10 digits)
+		}
+		for _, s := range valid {
+			v := validator.Val(s).Validate(validator.MobileWithCode())
+			if !v.IsValid() {
+				t.Errorf("MobileWithCode(%q) should pass, got errors: %v", s, v.Errors())
+			}
+		}
+	})
+
+	t.Run("all-zero phone number fails", func(t *testing.T) {
+		invalid := []string{
+			"1-0000000",   // all zeros
+			"86-0000000",  // all zeros
+			"999-0000000", // all zeros, country code too long
+		}
+		for _, s := range invalid {
+			v := validator.Val(s).Validate(validator.MobileWithCode())
+			if v.IsValid() {
+				t.Errorf("MobileWithCode(%q) should fail but passed", s)
+			}
+		}
+	})
+
+	t.Run("4-digit country code fails", func(t *testing.T) {
+		v := validator.Val("9999-1234567").Validate(validator.MobileWithCode())
+		if v.IsValid() {
+			t.Error("4-digit country code should fail")
+		}
+	})
+
+	t.Run("missing separator fails", func(t *testing.T) {
+		v := validator.Val("8615029009572").Validate(validator.MobileWithCode())
+		if v.IsValid() {
+			t.Error("Missing separator should fail")
+		}
+	})
+
+	t.Run("phone too short fails", func(t *testing.T) {
+		v := validator.Val("86-123456").Validate(validator.MobileWithCode())
+		if v.IsValid() {
+			t.Error("Phone shorter than 7 digits should fail")
+		}
+	})
 }
 
 func TestTimeYm(t *testing.T) {
