@@ -1,6 +1,7 @@
 package validator_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/lb151/validator"
@@ -97,6 +98,87 @@ func TestMax(t *testing.T) {
 		}
 		if v.Errors()[0].Error() != customMsg {
 			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+}
+
+func TestMinMaxNaN(t *testing.T) {
+	t.Run("NaN fails Min", func(t *testing.T) {
+		v := validator.Val(math.NaN()).Validate(validator.Min[float64](18))
+		if v.IsValid() {
+			t.Error("Expected Min to reject NaN")
+		}
+	})
+
+	t.Run("NaN fails Max", func(t *testing.T) {
+		v := validator.Val(math.NaN()).Validate(validator.Max[float64](100))
+		if v.IsValid() {
+			t.Error("Expected Max to reject NaN")
+		}
+	})
+
+	t.Run("NaN fails both Min and Max", func(t *testing.T) {
+		v := validator.Val(math.NaN()).Validate(
+			validator.Min[float64](18),
+			validator.Max[float64](100),
+		)
+		if len(v.Errors()) != 2 {
+			t.Errorf("Expected 2 errors for NaN, got %d: %v", len(v.Errors()), v.Errors())
+		}
+	})
+
+	t.Run("NaN fails with float32", func(t *testing.T) {
+		v := validator.Val[float32](float32(math.NaN())).Validate(validator.Min[float32](1))
+		if v.IsValid() {
+			t.Error("Expected Min to reject float32 NaN")
+		}
+	})
+
+	t.Run("NaN default error message", func(t *testing.T) {
+		v := validator.Val(math.NaN(), "age").Validate(validator.Min[float64](18))
+		want := "age must not be NaN"
+		if v.Errors()[0].Error() != want {
+			t.Errorf("Expected %q, got %q", want, v.Errors()[0].Error())
+		}
+	})
+
+	t.Run("NaN custom error message", func(t *testing.T) {
+		customMsg := "not a number"
+		v := validator.Val(math.NaN()).Validate(validator.Max[float64](100, customMsg))
+		if v.Errors()[0].Error() != customMsg {
+			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+
+	t.Run("regular floats still pass", func(t *testing.T) {
+		v := validator.Val(50.0).Validate(
+			validator.Min[float64](18),
+			validator.Max[float64](100),
+		)
+		if !v.IsValid() {
+			t.Errorf("Expected regular float to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("integers are unaffected", func(t *testing.T) {
+		v := validator.Val(50).Validate(validator.Min(18), validator.Max(100))
+		if !v.IsValid() {
+			t.Errorf("Expected int to pass, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("infinities keep range semantics", func(t *testing.T) {
+		if !validator.Val(math.Inf(1)).Validate(validator.Min[float64](18)).IsValid() {
+			t.Error("Expected +Inf to satisfy Min")
+		}
+		if validator.Val(math.Inf(1)).Validate(validator.Max[float64](100)).IsValid() {
+			t.Error("Expected +Inf to fail Max")
+		}
+		if validator.Val(math.Inf(-1)).Validate(validator.Min[float64](18)).IsValid() {
+			t.Error("Expected -Inf to fail Min")
+		}
+		if !validator.Val(math.Inf(-1)).Validate(validator.Max[float64](100)).IsValid() {
+			t.Error("Expected -Inf to satisfy Max")
 		}
 	})
 }
@@ -281,7 +363,7 @@ func TestEmail(t *testing.T) {
 	t.Run("email with unicode fails", func(t *testing.T) {
 		v := validator.Val("tëst@example.com").Validate(validator.Email())
 		if v.IsValid() {
-			t.Errorf("Expected validation to pass for unicode email, got errors: %v", v.Errors())
+			t.Errorf("Expected validation to fail for unicode email, got errors: %v", v.Errors())
 		}
 	})
 

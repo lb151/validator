@@ -41,7 +41,7 @@ func TrimSpace() func(Value[string]) (string, error) {
 }
 
 // Capitalise returns a transformation that converts the
-// first character of the value to upper case.
+// convert the first character of the value to uppercase, and convert the remaining characters to lowercase.
 //
 // Example:
 //
@@ -52,6 +52,8 @@ func Capitalise() func(Value[string]) (string, error) {
 			return "", nil
 		}
 
-		return strings.ToUpper(v.value[:1]) + strings.ToLower(v.value[1:]), nil
+		value := []rune(v.value)
+
+		return strings.ToUpper(string(value[:1])) + strings.ToLower(string(value[1:])), nil
 	}
 }

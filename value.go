@@ -137,6 +137,9 @@ func (v Value[T]) Transform(transformations ...func(Value[T]) (T, error)) Value[
 //	    return c.Errors()
 //	}
 func (v Value[T]) Collect(c *Collector) T {
-	c.errs = append(c.errs, v.errs...)
+	if c != nil {
+		c.errs = append(c.errs, v.errs...)
+	}
+
 	return v.value
 }

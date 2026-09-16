@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"net/url"
 	"slices"
+	"strconv"
 	"time"
 )
 
@@ -54,6 +55,19 @@ func Required[T comparable](errsMsg ...string) func(Value[T]) error {
 //	validator.Val(100).Validate(validator.Max(100))
 func Max[T Ordered](max T, errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
+		// NaN is the only value that is unequal to itself; all
+		// ordered comparisons against it are false, so without
+		// this check "v.value > max" would let NaN slip through.
+		// For integer types the expression is always false.
+		if v.value != v.value {
+			// Return custom error message, if provided
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " must not be NaN")
+		}
+
 		if v.value > max {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
@@ -81,6 +95,19 @@ func Max[T Ordered](max T, errsMsg ...string) func(Value[T]) error {
 //	validator.Val(5).Validate(validator.Min(1))
 func Min[T Ordered](min T, errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
+		// NaN is the only value that is unequal to itself; all
+		// ordered comparisons against it are false, so without
+		// this check "v.value < min" would let NaN slip through.
+		// For integer types the expression is always false.
+		if v.value != v.value {
+			// Return custom error message, if provided
+			if len(errsMsg) > 0 && errsMsg[0] != "" {
+				return errors.New(errsMsg[0])
+			}
+
+			return errors.New(v.name + " must not be NaN")
+		}
+
 		if v.value < min {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
@@ -422,7 +449,7 @@ func MobileWithCode(errsMsg ...string) func(Value[string]) error {
 }
 
 // TimeYm returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// verify the format of the year and month string.
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -448,7 +475,7 @@ func TimeYm(errsMsg ...string) func(Value[string]) error {
 }
 
 // TimeYmd returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// verify the format of the date string (year, month, day).
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -474,7 +501,7 @@ func TimeYmd(errsMsg ...string) func(Value[string]) error {
 }
 
 // TimeYmdHis returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// verify the format of the date string (year, month, day, hour, minute and second).
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -500,7 +527,7 @@ func TimeYmdHis(errsMsg ...string) func(Value[string]) error {
 }
 
 // URL returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// verify the format of the URL.
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -513,7 +540,7 @@ func URL(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		flag := true
 		urlLen := len([]rune(v.value))
-		if v.value == "" || urlLen >= maxURLRuneCount || urlLen <= minURLRuneCount {
+		if v.value == "" || urlLen > maxURLRuneCount || urlLen < minURLRuneCount {
 			flag = false
 		}
 
@@ -521,6 +548,13 @@ func URL(errsMsg ...string) func(Value[string]) error {
 			u, err := url.Parse(v.value)
 			if err != nil || u.Scheme == "" || u.Host == "" {
 				flag = false
+			} else {
+				if u.Port() != "" {
+					port, pErr := strconv.Atoi(u.Port())
+					if pErr != nil || port > 65535 || port < 0 {
+						flag = false
+					}
+				}
 			}
 		}
 
@@ -537,7 +571,7 @@ func URL(errsMsg ...string) func(Value[string]) error {
 }
 
 // IP returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// verify the format of the IP address.
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -562,7 +596,7 @@ func IP(errsMsg ...string) func(Value[string]) error {
 }
 
 // JSON returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// verify the format of the JSON.
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -585,8 +619,7 @@ func JSON(errsMsg ...string) func(Value[string]) error {
 	}
 }
 
-// An optional custom error message can be provided as the
-// last parameter.
+// verify the format of the alpha string.
 //
 // Example:
 //
@@ -606,8 +639,7 @@ func Alpha(errsMsg ...string) func(Value[string]) error {
 	}
 }
 
-// An optional custom error message can be provided as the
-// last parameter.
+// verify the format of the alphanumeric string.
 //
 // Example:
 //
@@ -627,12 +659,14 @@ func Alphanumeric(errsMsg ...string) func(Value[string]) error {
 	}
 }
 
+// verify the format of the numeric value.
+//
 // An optional custom error message can be provided as the
 // last parameter.
 //
 // Example:
 //
-//	validator.Val(-1).Validate(validator.Numeric("cannot be a numeric"))
+//	validator.Val(-1).Validate(validator.Numeric("cannot be a negative number"))
 
 func Numeric[T IntOrdered](errsMsg ...string) func(Value[T]) error {
 	return func(v Value[T]) error {
@@ -642,7 +676,7 @@ func Numeric[T IntOrdered](errsMsg ...string) func(Value[T]) error {
 				return errors.New(errsMsg[0])
 			}
 
-			return errors.New(v.name + " cannot be a numeric")
+			return errors.New(v.name + " cannot be a negative number")
 		}
 
 		return nil

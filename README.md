@@ -209,4 +209,4 @@ Validator was built to provide a type-safe validation and transformation experie
 
 ---
 
-**Note**: Validator requires Go 1.18 or later for generics support.
+**Note**: Validator requires Go 1.25 or later for generics support.

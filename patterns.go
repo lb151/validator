@@ -8,7 +8,7 @@ const (
 	timeLayoutYmdHis = "2006-01-02 15:04:05"
 
 	maxURLRuneCount = 2083
-	minURLRuneCount = 3
+	minURLRuneCount = 4
 
 	emailExp        = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
 	idNoExp         = `^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[0-9Xx]$`
