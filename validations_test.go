@@ -591,6 +591,91 @@ func TestMobileWithCode(t *testing.T) {
 			t.Error("Phone shorter than 7 digits should fail")
 		}
 	})
+
+	t.Run("country code with leading zero fails", func(t *testing.T) {
+		// Country code must start with 1-9 (regex: ^[1-9]\d{0,2}-).
+		invalid := []string{
+			"0-1502900957",  // leading zero country code
+			"08-1502900957", // zero in country code
+		}
+		for _, s := range invalid {
+			v := validator.Val(s).Validate(validator.MobileWithCode())
+			if v.IsValid() {
+				t.Errorf("MobileWithCode(%q) should fail but passed", s)
+			}
+		}
+	})
+
+	t.Run("phone too long fails", func(t *testing.T) {
+		// Regex allows 7-12 national digits ([1-9]\d{6,11}); 13 should fail.
+		v := validator.Val("86-1234567890123").Validate(validator.MobileWithCode())
+		if v.IsValid() {
+			t.Error("Phone longer than 12 digits should fail")
+		}
+	})
+
+	t.Run("non-digit characters fail", func(t *testing.T) {
+		invalid := []string{
+			"86-1502900abc2",   // letters in phone
+			"86-1502 900957 2", // spaces in phone
+			"ab-1502900957",    // letters in country code
+			"86-1502900957!",   // trailing punctuation
+			"86-+1502900957",   // plus sign inside
+		}
+		for _, s := range invalid {
+			v := validator.Val(s).Validate(validator.MobileWithCode())
+			if v.IsValid() {
+				t.Errorf("MobileWithCode(%q) should fail but passed", s)
+			}
+		}
+	})
+
+	t.Run("multiple separators fail", func(t *testing.T) {
+		invalid := []string{
+			"86-15-02900957",
+			"8-6-1502900957",
+			"86--1502900957",
+			"86-1502900957-",
+			"-86-1502900957",
+		}
+		for _, s := range invalid {
+			v := validator.Val(s).Validate(validator.MobileWithCode())
+			if v.IsValid() {
+				t.Errorf("MobileWithCode(%q) should fail but passed", s)
+			}
+		}
+	})
+
+	t.Run("empty string fails", func(t *testing.T) {
+		v := validator.Val("").Validate(validator.MobileWithCode())
+		if v.IsValid() {
+			t.Error("Empty string should fail")
+		}
+	})
+
+	t.Run("boundary lengths pass", func(t *testing.T) {
+		// 1-digit country code + 7-digit phone (minimum allowed)
+		v1 := validator.Val("1-1234567").Validate(validator.MobileWithCode())
+		if !v1.IsValid() {
+			t.Errorf("1+7 digits should pass, got errors: %v", v1.Errors())
+		}
+		// 3-digit country code + 12-digit phone (maximum allowed)
+		v2 := validator.Val("999-123456789012").Validate(validator.MobileWithCode())
+		if !v2.IsValid() {
+			t.Errorf("3+12 digits should pass, got errors: %v", v2.Errors())
+		}
+	})
+
+	t.Run("default error message uses value name", func(t *testing.T) {
+		v := validator.Val("1502900957", "phone").Validate(validator.MobileWithCode())
+		if len(v.Errors()) == 0 {
+			t.Fatal("Expected validation to fail")
+		}
+		want := "phone must be a mobile number"
+		if v.Errors()[0].Error() != want {
+			t.Errorf("Expected %q, got %q", want, v.Errors()[0].Error())
+		}
+	})
 }
 
 func TestTimeYm(t *testing.T) {
@@ -697,6 +782,56 @@ func TestURL(t *testing.T) {
 		}
 		if v.Errors()[0].Error() != customMsg {
 			t.Errorf("Expected %q, got %q", customMsg, v.Errors()[0].Error())
+		}
+	})
+
+	t.Run("port 0 is rejected", func(t *testing.T) {
+		// Port 0 is reserved by IANA; must not be accepted.
+		v := validator.Val("http://host:0/path").Validate(validator.URL())
+		if v.IsValid() {
+			t.Error("Port 0 should be rejected")
+		}
+	})
+
+	t.Run("port 1 is accepted", func(t *testing.T) {
+		v := validator.Val("http://host:1/path").Validate(validator.URL())
+		if !v.IsValid() {
+			t.Errorf("Port 1 should be accepted, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("port 65535 is accepted", func(t *testing.T) {
+		v := validator.Val("http://host:65535/path").Validate(validator.URL())
+		if !v.IsValid() {
+			t.Errorf("Port 65535 should be accepted, got errors: %v", v.Errors())
+		}
+	})
+
+	t.Run("port 65536 is rejected", func(t *testing.T) {
+		v := validator.Val("http://host:65536/path").Validate(validator.URL())
+		if v.IsValid() {
+			t.Error("Port 65536 should be rejected")
+		}
+	})
+
+	t.Run("non-numeric port is rejected", func(t *testing.T) {
+		v := validator.Val("http://host:abc/path").Validate(validator.URL())
+		if v.IsValid() {
+			t.Error("Non-numeric port should be rejected")
+		}
+	})
+
+	t.Run("negative port is rejected", func(t *testing.T) {
+		v := validator.Val("http://host:-1/path").Validate(validator.URL())
+		if v.IsValid() {
+			t.Error("Negative port should be rejected")
+		}
+	})
+
+	t.Run("IPv6 URL with port is accepted", func(t *testing.T) {
+		v := validator.Val("http://[::1]:8080/path").Validate(validator.URL())
+		if !v.IsValid() {
+			t.Errorf("IPv6 URL with port should be accepted, got errors: %v", v.Errors())
 		}
 	})
 }

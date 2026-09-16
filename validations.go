@@ -551,7 +551,7 @@ func URL(errsMsg ...string) func(Value[string]) error {
 			} else {
 				if u.Port() != "" {
 					port, pErr := strconv.Atoi(u.Port())
-					if pErr != nil || port > 65535 || port < 0 {
+					if pErr != nil || port > 65535 || port < 1 {
 						flag = false
 					}
 				}
