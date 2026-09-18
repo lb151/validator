@@ -9,6 +9,7 @@ const (
 
 	maxURLRuneCount = 2083
 	minURLRuneCount = 4
+	idNoCheckChars  = "10X98765432"
 
 	emailExp        = "^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
 	idNoExp         = `^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[0-9Xx]$`
@@ -21,6 +22,8 @@ const (
 )
 
 var (
+	idNoweights = []int{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2}
+
 	rxEmail        = regexp.MustCompile(emailExp)
 	rxIdNo         = regexp.MustCompile(idNoExp)
 	rxMobile       = regexp.MustCompile(mobileExp)

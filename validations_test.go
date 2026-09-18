@@ -542,7 +542,7 @@ func TestMobileWithCode(t *testing.T) {
 	t.Run("international numbers pass", func(t *testing.T) {
 		// Various valid international format numbers
 		valid := []string{
-			"86-15029009572", // China (13 digits national)
+			"86-15029009572", // China (11 digits national)
 			"1-2025550143",   // US/Canada (10 digits)
 			"44-2079460942",  // UK (10 digits)
 			"81-312345678",   // Japan (9 digits)

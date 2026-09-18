@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"net/mail"
 	"net/url"
 	"slices"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 // Required returns a validation that ensures the value is
@@ -132,13 +132,13 @@ func Min[T Ordered](min T, errsMsg ...string) func(Value[T]) error {
 //	validator.Val("username").Validate(validator.MaxLengthString(20))
 func MaxLengthString(max int, errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		if len([]rune(v.value)) > max {
+		if utf8.RuneCountInString(v.value) > max {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
 			}
 
-			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
+			return errors.New(v.name + "'s length cannot be larger than " + strconv.Itoa(max))
 		}
 
 		return nil
@@ -162,7 +162,7 @@ func MaxLengthSlice[T any](max int, errsMsg ...string) func(Value[[]T]) error {
 				return errors.New(errsMsg[0])
 			}
 
-			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
+			return errors.New(v.name + "'s length cannot be larger than " + strconv.Itoa(max))
 		}
 
 		return nil
@@ -186,7 +186,7 @@ func MaxLengthMap[K comparable, V any](max int, errsMsg ...string) func(Value[ma
 				return errors.New(errsMsg[0])
 			}
 
-			return fmt.Errorf("%s's length cannot be larger than %v", v.name, max)
+			return errors.New(v.name + "'s length cannot be larger than " + strconv.Itoa(max))
 		}
 
 		return nil
@@ -204,13 +204,13 @@ func MaxLengthMap[K comparable, V any](max int, errsMsg ...string) func(Value[ma
 //	validator.Val("username").Validate(validator.MinLengthString(5))
 func MinLengthString(min int, errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		if len([]rune(v.value)) < min {
+		if utf8.RuneCountInString(v.value) < min {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
 			}
 
-			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
+			return errors.New(v.name + "'s length cannot be smaller than " + strconv.Itoa(min))
 		}
 
 		return nil
@@ -234,7 +234,7 @@ func MinLengthSlice[T any](min int, errsMsg ...string) func(Value[[]T]) error {
 				return errors.New(errsMsg[0])
 			}
 
-			return fmt.Errorf("%s's length cannot be smaller than %v", v.name, min)
+			return errors.New(v.name + "'s length cannot be smaller than " + strconv.Itoa(min))
 		}
 
 		return nil
@@ -281,19 +281,7 @@ func MinLengthMap[K comparable, V any](min int, errsMsg ...string) func(Value[ma
 //	validator.Val("user@example.com").Validate(validator.Email())
 func Email(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
-		flag := true
 		if !rxEmail.MatchString(v.value) {
-			flag = false
-		}
-
-		if flag {
-			_, err := mail.ParseAddress(v.value)
-			if err != nil {
-				flag = false
-			}
-		}
-
-		if !flag {
 			// Return custom error message, if provided
 			if len(errsMsg) > 0 && errsMsg[0] != "" {
 				return errors.New(errsMsg[0])
@@ -355,7 +343,7 @@ func NotIn[T comparable](values []T, errsMsg ...string) func(Value[T]) error {
 }
 
 // IdNo returns a validation that ensures the value
-// does not match any of the provided forbidden values.
+// is a valid Chinese ID card number.
 //
 // An optional custom error message can be provided as the
 // last parameter.
@@ -380,14 +368,12 @@ func IdNo(errsMsg ...string) func(Value[string]) error {
 		}
 
 		if flag {
-			weights := [17]int{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2}
-			checkMap := map[int]byte{0: '1', 1: '0', 2: 'X', 3: '9', 4: '8', 5: '7', 6: '6', 7: '5', 8: '4', 9: '3', 10: '2'}
 
 			sum := 0
-			for i := range 17 {
-				sum += int(v.value[i]-'0') * weights[i]
+			for i, w := range idNoweights {
+				sum += int(v.value[i]-'0') * w
 			}
-			want := checkMap[sum%11]
+			want := idNoCheckChars[sum%11]
 			last := v.value[17]
 			if last == 'x' {
 				last = 'X'
@@ -539,7 +525,7 @@ func TimeYmdHis(errsMsg ...string) func(Value[string]) error {
 func URL(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {
 		flag := true
-		urlLen := len([]rune(v.value))
+		urlLen := utf8.RuneCountInString(v.value)
 		if v.value == "" || urlLen > maxURLRuneCount || urlLen < minURLRuneCount {
 			flag = false
 		}

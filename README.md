@@ -65,11 +65,7 @@ func (v *User) ValidateFast() error {
 		validator.Field(validator.Val(v.Age,"age"),validator.Min(18, "Age must be 18 or over")),
 		)
 	
-	if err != nil {
-		return err
-    }
-		
-	return nil	
+	return err	
 }
 
 func (v *User) Validate() error {
@@ -106,7 +102,7 @@ func main() {
 
 	err := user.Validate()
 	if err != nil {
-		log.Fatalln("failed to initiate user: %w", err)
+		log.Printf("failed to initiate user: %v", err)
 	}
 
 	fmt.Println("Success!")
@@ -209,4 +205,4 @@ Validator was built to provide a type-safe validation and transformation experie
 
 ---
 
-**Note**: Validator requires Go 1.25 or later for generics support.
+**Note**: Validator requires Go 1.25 or later.
