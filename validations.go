@@ -398,6 +398,12 @@ func IdNo(errsMsg ...string) func(Value[string]) error {
 	}
 }
 
+// Mobile returns a validation that ensures the value
+// is a Chinese domestic mobile phone number.
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
 // Example:
 //
 //	validator.Val("1502900957").Validate(validator.Mobile("is not a mobile number"))
@@ -416,9 +422,17 @@ func Mobile(errsMsg ...string) func(Value[string]) error {
 	}
 }
 
+// MobileWithCode returns a validation that ensures the value
+// is an international mobile phone number with country code,
+// conforming to the ITU-T E.164 standard (country code up to 3
+// digits and phone number starting with a non-zero digit).
+//
+// An optional custom error message can be provided as the
+// last parameter.
+//
 // Example:
 //
-//	validator.Val("86-1502900957").Validate(validator.Mobile("is not a mobile number"))
+//	validator.Val("86-1502900957").Validate(validator.MobileWithCode("is not a mobile number"))
 
 func MobileWithCode(errsMsg ...string) func(Value[string]) error {
 	return func(v Value[string]) error {

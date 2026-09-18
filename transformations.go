@@ -2,6 +2,7 @@ package validator
 
 import (
 	"strings"
+	"unicode/utf8"
 )
 
 // Uppercase returns a transformation that converts the
@@ -52,8 +53,17 @@ func Capitalise() func(Value[string]) (string, error) {
 			return "", nil
 		}
 
-		value := []rune(v.value)
+		_, size := utf8.DecodeRuneInString(v.value)
+		head := v.value[:size]
+		fail := v.value[size:]
 
-		return strings.ToUpper(string(value[:1])) + strings.ToLower(string(value[1:])), nil
+		up := strings.ToUpper(head)
+		low := strings.ToLower(fail)
+
+		if up == head && low == fail {
+			return v.value, nil
+		}
+
+		return up + low, nil
 	}
 }
