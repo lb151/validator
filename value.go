@@ -1,5 +1,7 @@
 package validator
 
+import "slices"
+
 // Value holds a value to be validated/transformed, along
 // with its name and any errors that occur during
 // validation/transformation.
@@ -53,7 +55,7 @@ func (v Value[T]) Name() string {
 // Errors returns all errors that have occurred.
 // Returns an empty slice if validation/transformation passed.
 func (v Value[T]) Errors() []error {
-	return v.errs
+	return slices.Clone(v.errs)
 }
 
 // IsValid returns true if there are no errors,
